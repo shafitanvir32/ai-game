@@ -32,15 +32,22 @@ def weighted_orb(b: Board, p: int) -> float:
 
 
 def frontier(b: Board, p: int) -> float:
-    """Net number of borders between your cells and the opponent’s."""
+    """Net frontier advantage for ``p``.
+
+    Each border between adjacent cells is considered exactly once by only
+    looking to the right and down.  Borders with empty cells are ignored.
+    """
+
+    rows, cols = len(b.grid), len(b.grid[0])
     f = 0
     for r, row in enumerate(b.grid):
         for c, cell in enumerate(row):
-            for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            for dr, dc in ((1, 0), (0, 1)):  # count each shared edge once
                 nr, nc = r + dr, c + dc
-                if not (0 <= nr < 9 and 0 <= nc < 6):
+                if nr >= rows or nc >= cols:
                     continue
                 n_owner = b.grid[nr][nc].owner
+                # only count borders where the players face each other
                 if cell.owner == p and n_owner == 1 - p:
                     f += 1
                 elif cell.owner == 1 - p and n_owner == p:
