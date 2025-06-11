@@ -4,7 +4,7 @@ ai/heuristics.py
 Five evaluation functions the minimax agent can choose from.
 """
 
-from core.board import Board, RED, BLUE, CRITS
+from core.board import Board, RED, BLUE, CRITS, ROWS, COLS
 
 
 def orb_difference(b: Board, p: int) -> float:
@@ -32,19 +32,23 @@ def weighted_orb(b: Board, p: int) -> float:
 
 
 def frontier(b: Board, p: int) -> float:
-    """Net number of borders between your cells and the opponent’s."""
+    """Net number of frontier cells (yours – opponent’s)."""
     f = 0
     for r, row in enumerate(b.grid):
         for c, cell in enumerate(row):
+            owner = cell.owner
+            if owner not in (p, 1 - p):
+                continue
             for dr, dc in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nr, nc = r + dr, c + dc
-                if not (0 <= nr < 9 and 0 <= nc < 6):
-                    continue
-                n_owner = b.grid[nr][nc].owner
-                if cell.owner == p and n_owner == 1 - p:
-                    f += 1
-                elif cell.owner == 1 - p and n_owner == p:
-                    f -= 1
+                if 0 <= nr < ROWS and 0 <= nc < COLS:
+                    n_owner = b.grid[nr][nc].owner
+                    if owner == p and n_owner == 1 - p:
+                        f += 1
+                        break
+                    elif owner == 1 - p and n_owner == p:
+                        f -= 1
+                        break
     return f
 
 
